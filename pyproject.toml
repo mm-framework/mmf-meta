@@ -3,6 +3,7 @@ name = "mmf-meta"
 version = "0.1.0"
 description = ""
 authors = ["Викторов Андрей Германович <andvikt@gmail.com>"]
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -26,3 +27,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 mmfmeta = 'mmf_meta:cli'
+
+[tool.poetry.urls]
+homepage = 'https://github.com/mm-framework/mmf-meta'
+documentation = 'https://mm-framework.github.io/docs/'
