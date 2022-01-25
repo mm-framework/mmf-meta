@@ -3,6 +3,7 @@ import functools
 import io
 import mmap
 import os
+import re
 import typing
 import urllib.request
 from dataclasses import dataclass
@@ -10,6 +11,8 @@ from pathlib import Path
 from urllib import parse
 from enum import Enum
 from .autodoc import desc, autodoc_dc
+
+ext_patt = re.compile(r"\.(\w+?)\?")
 
 try:
     import orjson
@@ -97,7 +100,7 @@ class DescriptorBase:
     def load_url(self, url: str, target_file: str = None):
         raise NotImplemented
 
-    def load_file(self, file_path: typing.Union[os.PathLike, str]):
+    def load_file(self, file_path: typing.Union[os.PathLike, str], ext=None):
         raise NotImplemented
 
     def to_file(self, data, ext=None, target_file: str = None) -> io.BytesIO:
@@ -197,9 +200,13 @@ class DataFrame(DescriptorBase):
     _output_formats = _input_formats
 
     def load_url(self, url: str, target_file: str = None):
-        return self.load_file(url)
+        try:
+            ext = next(ext_patt.finditer(url)).group(1).lower()
+        except StopIteration:
+            raise ValueError(f"no extention in url {url}")
+        return self.load_file(url, ext=ext)
 
-    def load_file(self, file_path: typing.Union[str, os.PathLike]):
+    def load_file(self, file_path: typing.Union[str, os.PathLike], ext: str = None):
         if pandas is None:
             raise ImportError(f"pandas must be installed")
         if "dtype" not in self.pandas_params and self.schema:
@@ -207,7 +214,9 @@ class DataFrame(DescriptorBase):
             params["dtype"] = self.schema
         else:
             params = self.pandas_params
-        *_, ext = file_path.lower().split(".")
+        if not ext:
+            *_, ext = file_path.lower().split(".")
+
         foo = _df_map_from.get(DataFrameFormat(ext))
         if not foo:
             raise ValueError(
@@ -333,12 +342,12 @@ class Image(DescriptorBase):
                 data = cv2.cvtColor(data, cv2.COLOR_BGR2RGB)
         return data
 
-    def load_file(self, file_path: typing.Union[str, os.PathLike]):
+    def load_file(self, file_path: typing.Union[str, os.PathLike], ext: str = None):
         if cv2 is None:
             raise ImportError("opencv-python must be installed")
         if jpeg is None:
             raise ImportError("PyTurboJPEG must be installed")
-        if file_path[:-3] == "jpg":
+        if file_path[:-3] == "jpg" or ext in ("jpg", "jpeg"):
             with open(file_path, "br") as f:
                 ret = jpeg.decode(f)
                 if self.color == ColorMode.BGR:
