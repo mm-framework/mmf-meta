@@ -161,6 +161,8 @@ def _wrap_value(n, v):
         return v.value
     elif n in ("schema", "default"):
         return str(v)
+    else:
+        return v
 
 
 def _factory(d):
