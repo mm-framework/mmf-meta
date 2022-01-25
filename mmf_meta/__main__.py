@@ -7,6 +7,7 @@ from mmf_meta.core import scan, get_signature
 
 @click.group()
 def cli():
+    sys.path.append(os.getcwd())
     return
 
 
