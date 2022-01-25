@@ -1,4 +1,4 @@
-__version__ = "0.1.4"
+__version__ = "0.1.5b0"
 from .core import target, artifact
 from .descriptors import (
     DescriptorBase,
