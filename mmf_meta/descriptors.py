@@ -124,7 +124,7 @@ def read_excel(file, engine=None, **kwargs):
         return pandas.read_excel(file, engine=engine, **kwargs)
 
 
-def write_excel(data: pandas.DataFrame, file, engine=None, **kwargs):
+def write_excel(data: "pandas.DataFrame", file, engine=None, **kwargs):
     if isinstance(file, str):
         return data.to_excel(file, **kwargs)
     else:
