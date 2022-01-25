@@ -4,6 +4,7 @@ import json
 import click
 from mmf_meta.core import scan, get_signature
 import sys
+import os
 
 
 @click.group()
