@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mmf-meta"
-version = "0.1.3b1"
+version = "0.1.3b2"
 description = ""
 authors = ["Викторов Андрей Германович <andvikt@gmail.com>"]
 readme = "README.md"
