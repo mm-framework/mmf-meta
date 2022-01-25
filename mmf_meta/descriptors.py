@@ -243,11 +243,11 @@ class DataFrame(DescriptorBase):
             buf = io.BytesIO()
         else:
             buf = target_file
-        ret = foo(data, buf)
+        foo(data, buf)
         if target_file:
             return target_file
         else:
-            return ret
+            return buf
 
 
 class ColorMode(str, Enum):
