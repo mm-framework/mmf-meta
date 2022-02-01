@@ -1,11 +1,8 @@
-__version__ = "0.1.8b0"
+__version__ = "0.1.8b1"
 from .core import target, artifact
 from .descriptors import (
     DescriptorBase,
-    DataFrameFormat,
     DataFrame,
-    ColorMode,
-    ImageFormat,
     Image,
     String,
     Integer,
@@ -15,4 +12,5 @@ from .descriptors import (
     Dict,
     JsonFile,
 )
+from mmf_meta.formats import DataFrameFormat, ColorMode, ImageFormat
 from .__main__ import cli
