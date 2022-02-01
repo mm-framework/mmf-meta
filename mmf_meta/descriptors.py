@@ -1,4 +1,5 @@
 import datetime
+import enum
 import functools
 import io
 import mmap
@@ -9,42 +10,26 @@ import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from urllib import parse
-from enum import Enum
+
+from .formats import DataFrameFormat, ColorMode, ImageFormat
 from .autodoc import desc, autodoc_dc
+from ._imports import *
+from .df_io import _df_map_from, _df_map_to
 
 ext_patt = re.compile(r"\.(\w+?)\?")
 
-try:
-    import orjson
-except ImportError:
-    orjson = None
 
-try:
-    import fastapi
-    from fastapi import UploadFile
-except ImportError:
-    fastapi = None
-    UploadFile = None
-
-try:
-    import cv2
-except ImportError:
-    cv2 = None
-
-try:
-    import pandas
-    import numpy as np
-except ImportError:
-    pandas = None
-    np = None
-
-
-try:
-    from turbojpeg import TurboJPEG
-
-    jpeg = TurboJPEG()
-except Exception:
-    jpeg = None
+class DescriptorClass(str, enum.Enum):
+    DataFrame = "DataFrame"
+    Image = "Image"
+    String = "String"
+    Integer = "Integer"
+    Float = "Float"
+    Datetime = "Datetime"
+    Bool = "Bool"
+    Dict = "Dict"
+    JsonFile = "JsonFile"
+    DescriptorBase = "DescriptorBase"
 
 
 @autodoc_dc
@@ -69,7 +54,9 @@ class DescriptorBase:
     is_file: bool = desc(
         False, description="Если True, ожидается бинарный файл на входе", init=False
     )
-    class_name: str = desc(None, description="Название дескриптора", init=False)
+    class_name: DescriptorClass = desc(
+        DescriptorClass.DescriptorBase, description="Название дескриптора", init=False
+    )
     _proto_name = None
     _pydantic_type = None
     _input_formats = None
@@ -79,7 +66,7 @@ class DescriptorBase:
     def __post_init__(self):
         if self.is_file:
             self._pydantic_type = UploadFile
-        self.class_name = self.__class__.__name__
+        self.class_name = DescriptorClass(self.__class__.__name__)
 
     @property
     def fastapi_descriptor(self) -> typing.Tuple[typing.Any, typing.Any]:
@@ -105,55 +92,6 @@ class DescriptorBase:
 
     def to_file(self, data, ext=None, target_file: str = None) -> io.BytesIO:
         raise NotImplemented
-
-
-class DataFrameFormat(str, Enum):
-    """
-    Тип файла DataFrame.
-    """
-
-    XLSX = "xlsx"
-    XLS = "xls"
-    CSV = "csv"
-    XML = "xml"
-    JSON = "json"
-    PARQUET = "parquet"
-
-
-def read_excel(file, engine=None, **kwargs):
-    if isinstance(file, str):
-        return pandas.read_excel(file)
-    else:
-        return pandas.read_excel(file, engine=engine, **kwargs)
-
-
-def write_excel(data: "pandas.DataFrame", file, engine=None, **kwargs):
-    if isinstance(file, str):
-        return data.to_excel(file, **kwargs)
-    else:
-        return data.to_excel(file, engine=engine, **kwargs)
-
-
-if pandas:
-    _df_map_to = {
-        DataFrameFormat.XLSX: functools.partial(write_excel, engine="xlsxwriter"),
-        DataFrameFormat.XLS: functools.partial(write_excel, engine="openpyxl"),
-        DataFrameFormat.CSV: pandas.DataFrame.to_csv,
-        DataFrameFormat.XML: pandas.DataFrame.to_xml,
-        DataFrameFormat.JSON: pandas.DataFrame.to_json,
-        DataFrameFormat.PARQUET: pandas.DataFrame.to_parquet,
-    }
-    _df_map_from = {
-        DataFrameFormat.XLSX: functools.partial(read_excel, engine="openpyxl"),
-        DataFrameFormat.XLS: functools.partial(read_excel, engine="xlrd"),
-        DataFrameFormat.CSV: pandas.read_csv,
-        DataFrameFormat.XML: pandas.read_xml,
-        DataFrameFormat.JSON: pandas.read_json,
-        DataFrameFormat.PARQUET: pandas.read_parquet,
-    }
-else:
-    _df_map_to = {}
-    _df_map_from = {}
 
 
 @autodoc_dc
@@ -248,23 +186,6 @@ class DataFrame(DescriptorBase):
             return target_file
         else:
             return buf
-
-
-class ColorMode(str, Enum):
-    """
-    Цветовая схема изображения
-    """
-
-    RGB = "rgb"
-    BGR = "bgr"
-
-
-class ImageFormat(str, Enum):
-    """
-    Формат исходящего файла
-    """
-
-    JPG = "jpg"
 
 
 if jpeg and cv2:

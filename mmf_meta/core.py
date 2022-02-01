@@ -40,6 +40,8 @@ def _check_foo(foo):
         else:
             only_files = False
         signature[p.name] = p.default
+        if p.default.name is None:
+            p.default.name = p.name
     if has_files and not only_files:
         raise DescriptorError(
             f"if has any file input, must have only file inputs (DataFrame, Image, JsonFile)"
@@ -157,17 +159,22 @@ def scan() -> typing.Tuple[typing.List[Target], typing.List[Artifact]]:
 
 
 def _wrap_value(n, v):
+    if n == "signature":
+        try:
+            return "descriptors", [desc | {"id": name} for name, desc in v.items()]
+        except:
+            pass
     if isinstance(v, enum.Enum):
-        return v.value
+        return n, v.value
     elif n in ("schema", "default"):
-        return str(v)
+        return n, str(v)
     else:
-        return v
+        return n, v
 
 
 def _factory(d):
 
-    return dict(((n, _wrap_value(n, v)) for n, v in d))
+    return dict((_wrap_value(n, v) for n, v in d))
 
 
 def get_signature(t: typing.Union[Target, Artifact]):
