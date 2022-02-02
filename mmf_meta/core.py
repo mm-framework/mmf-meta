@@ -160,10 +160,8 @@ def scan() -> typing.Tuple[typing.List[Target], typing.List[Artifact]]:
 
 def _wrap_value(n, v):
     if n == "signature":
-        try:
-            return "descriptors", [desc | {"id": name} for name, desc in v.items()]
-        except:
-            pass
+        return "descriptors", [desc | {"id": name} for name, desc in v.items()]
+
     if isinstance(v, enum.Enum):
         return n, v.value
     elif n in ("schema", "default"):
