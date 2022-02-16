@@ -22,8 +22,8 @@ def get_meta(script, out):
     module = importlib.import_module(script)
     targets, artifacts = scan()
     signature = {
-        "targets": [get_signature(t) for t in targets],
-        "artifacts": [get_signature(a) for a in artifacts],
+        "targets": [get_signature(t) for t in targets or []],
+        "artifacts": [get_signature(a) for a in artifacts or []],
     }
     with open(out, "w") as f:
         json.dump(signature, f, indent=2)
