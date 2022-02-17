@@ -9,7 +9,6 @@ class DataFrameFormat(str, Enum):
     XLSX = "xlsx"
     XLS = "xls"
     CSV = "csv"
-    XML = "xml"
     JSON = "json"
     PARQUET = "parquet"
 

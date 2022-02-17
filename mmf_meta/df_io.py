@@ -23,7 +23,6 @@ if pandas:
         DataFrameFormat.XLSX: functools.partial(write_excel, engine="xlsxwriter"),
         DataFrameFormat.XLS: functools.partial(write_excel, engine="openpyxl"),
         DataFrameFormat.CSV: pandas.DataFrame.to_csv,
-        DataFrameFormat.XML: pandas.DataFrame.to_xml,
         DataFrameFormat.JSON: pandas.DataFrame.to_json,
         DataFrameFormat.PARQUET: pandas.DataFrame.to_parquet,
     }
@@ -31,7 +30,6 @@ if pandas:
         DataFrameFormat.XLSX: functools.partial(read_excel, engine="openpyxl"),
         DataFrameFormat.XLS: functools.partial(read_excel, engine="xlrd"),
         DataFrameFormat.CSV: pandas.read_csv,
-        DataFrameFormat.XML: pandas.read_xml,
         DataFrameFormat.JSON: pandas.read_json,
         DataFrameFormat.PARQUET: pandas.read_parquet,
     }
